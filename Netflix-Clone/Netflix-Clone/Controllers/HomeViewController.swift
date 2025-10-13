@@ -8,6 +8,8 @@
 import UIKit
 
 class HomeViewController: UIViewController {
+    let selectionTitles = ["热门电影", "流行", "热门电视剧", "即将上映的电影", "高评分"]
+
     private let homeFeedTable: UITableView = {
         let table = UITableView(frame: .zero, style: .grouped)
         table.register(
@@ -36,6 +38,7 @@ class HomeViewController: UIViewController {
             UIBarButtonItem(image: UIImage(systemName: "person"), style: .done, target: self, action: nil),
             UIBarButtonItem(image: UIImage(systemName: "play.rectangle"), style: .done, target: self, action: nil),
         ]
+        navigationController?.navigationBar.tintColor = .white
     }
 
     override func viewDidLayoutSubviews() {
@@ -46,7 +49,7 @@ class HomeViewController: UIViewController {
 }
 extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 20
+        return selectionTitles.count
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
@@ -60,11 +63,37 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
         }
         return cell
     }
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return selectionTitles[section]
+    }
+
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let header = view as? UITableViewHeaderFooterView else {
+            return
+        }
+        header.textLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
+        header.textLabel?.textColor = .white
+        header.textLabel?.frame = CGRect(
+            x: header.bounds.origin.x + 20,
+            y: header.bounds.origin.y,
+            width: header.bounds.width,
+            height: header.bounds.height
+        )
+        header.textLabel?.textColor = .white
+    }
+
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 200
     }
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 40
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let defaultOffset = view.safeAreaInsets.top
+        let offset = scrollView.contentOffset.y + defaultOffset
+        navigationController?.navigationBar.transform = .init(translationX: 0, y: min(0, -offset))
     }
 
 }
