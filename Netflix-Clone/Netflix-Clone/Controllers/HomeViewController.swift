@@ -8,7 +8,7 @@
 import UIKit
 
 class HomeViewController: UIViewController {
-    let selectionTitles = ["热门电影", "流行", "热门电视剧", "即将上映的电影", "高评分"]
+    let selectionTitles = ["热门电影", "热门电视剧", "流行", "即将上映的电影", "高评分"]
 
     private let homeFeedTable: UITableView = {
         let table = UITableView(frame: .zero, style: .grouped)
@@ -27,7 +27,7 @@ class HomeViewController: UIViewController {
         configureNavbar()
         let headerView = HeroHeaderView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450))
         homeFeedTable.tableHeaderView = headerView
-        getTrendingMovies()
+        fetchData()
     }
 
     private func configureNavbar() {
@@ -46,15 +46,42 @@ class HomeViewController: UIViewController {
         homeFeedTable.frame = view.bounds
     }
 
-    private func getTrendingMovies() {
-        APICaller.shared.getTrendingMovies { result in
+    private func fetchData() {
+        // APICaller.shared.getTrendingMovies { result in
+        //     switch result {
+        //     case .success(let movies):
+        //         print(movies)
+        //     case .failure(let error):
+        //         print(error.localizedDescription)
+        //     }
+        // }
+        
+        // APICaller.shared.getUpcomingMovies { result in
+        //     switch result {
+        //     case .success(let movies):
+        //         print(movies)
+        //     case .failure(let error):
+        //         print(error.localizedDescription)
+        //     }
+        // }
+        
+        // APICaller.shared.getPopular { result in
+        //     switch result {
+        //     case .success(let movies):
+        //         print(movies)
+        //     case .failure(let error):
+        //         print(error.localizedDescription)
+        //     }
+        // }
+        
+        APICaller.shared.getTopRated { result in
             switch result {
             case .success(let movies):
                 print(movies)
             case .failure(let error):
                 print(error.localizedDescription)
             }
-        }
+        }   
     }
 
 
