@@ -7,6 +7,14 @@
 
 import UIKit
 
+enum SectionType: Int {
+    case TrendingMovies = 0
+    case TrendingTv = 1
+    case Popular = 2
+    case Upcoming = 3
+    case TopRated = 4
+}
+
 class HomeViewController: UIViewController {
     let selectionTitles = ["热门电影", "热门电视剧", "流行", "即将上映的电影", "高评分"]
 
@@ -27,7 +35,7 @@ class HomeViewController: UIViewController {
         configureNavbar()
         let headerView = HeroHeaderView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450))
         homeFeedTable.tableHeaderView = headerView
-        fetchData()
+        
     }
 
     private func configureNavbar() {
@@ -46,43 +54,7 @@ class HomeViewController: UIViewController {
         homeFeedTable.frame = view.bounds
     }
 
-    private func fetchData() {
-        // APICaller.shared.getTrendingMovies { result in
-        //     switch result {
-        //     case .success(let movies):
-        //         print(movies)
-        //     case .failure(let error):
-        //         print(error.localizedDescription)
-        //     }
-        // }
-        
-        // APICaller.shared.getUpcomingMovies { result in
-        //     switch result {
-        //     case .success(let movies):
-        //         print(movies)
-        //     case .failure(let error):
-        //         print(error.localizedDescription)
-        //     }
-        // }
-        
-        // APICaller.shared.getPopular { result in
-        //     switch result {
-        //     case .success(let movies):
-        //         print(movies)
-        //     case .failure(let error):
-        //         print(error.localizedDescription)
-        //     }
-        // }
-        
-        APICaller.shared.getTopRated { result in
-            switch result {
-            case .success(let movies):
-                print(movies)
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }   
-    }
+    
 
 
 }
@@ -98,6 +70,55 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
             withIdentifier: CollectionViewTableViewCell.identifier,
             for: indexPath
         ) as? CollectionViewTableViewCell else {
+            return UITableViewCell()
+        }
+        switch indexPath.section {
+        case SectionType.TrendingMovies.rawValue:
+            APICaller.shared.getTrendingMovies { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        case SectionType.TrendingTv.rawValue:
+            APICaller.shared.getTrendingTvs { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        case SectionType.Popular.rawValue:
+            APICaller.shared.getPopular { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        case SectionType.Upcoming.rawValue:
+            APICaller.shared.getUpcomingMovies { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        case SectionType.TopRated.rawValue:
+            APICaller.shared.getTopRated { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        default:
             return UITableViewCell()
         }
         return cell
