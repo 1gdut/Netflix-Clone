@@ -16,7 +16,6 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
-project.xcworkspace
 
 # Android/IntelliJ
 #
@@ -43,7 +42,9 @@ buck-out/
 *.jsbundle
 
 # CocoaPods
-/ios/Pods/
+Pods/
+*.xcworkspace
+!Netflix-Clone.xcodeproj/
 
 # Expo
 .expo/
