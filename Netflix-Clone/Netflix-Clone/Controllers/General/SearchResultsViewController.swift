@@ -6,9 +6,13 @@
 //
 
 import UIKit
+protocol SearchResultsViewControllerDelegate: AnyObject {
+    func searchResultsViewControllerDidTapItem(title: TitlePreviewViewModel)
+}
 
 class SearchResultsViewController: UIViewController {
     public var titles: [Title] = [Title]()
+    public weak var delegate: SearchResultsViewControllerDelegate?
     public let searchResultCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.itemSize = CGSize(width: UIScreen.main.bounds.width / 3 - 10, height: 200)
@@ -45,5 +49,20 @@ extension SearchResultsViewController: UICollectionViewDelegate, UICollectionVie
         let title = titles[indexPath.row]
         cell.configure(with: title.poster_path ?? "")
         return cell
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let title = titles[indexPath.row]
+        let titleName = title.title ?? "无标题"
+        APICaller.shared.getMovie(with: titleName) { [weak self] result in
+            switch result {
+            case .success(let videoElement):
+                DispatchQueue.main.async {
+                    self?.delegate?.searchResultsViewControllerDidTapItem(title: TitlePreviewViewModel(title: titleName, youTubeView: videoElement, overview: title.overview ?? "无描述"))
+                }
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
     }
 }

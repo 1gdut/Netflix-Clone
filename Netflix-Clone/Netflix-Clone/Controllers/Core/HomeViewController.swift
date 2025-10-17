@@ -17,7 +17,8 @@ enum SectionType: Int {
 
 class HomeViewController: UIViewController {
     let selectionTitles = ["热门电影", "热门电视剧", "流行", "即将上映的电影", "高评分"]
-
+    private var randomTrendingMovie: Title?
+    private var headerView: HeroHeaderView?
     private let homeFeedTable: UITableView = {
         let table = UITableView(frame: .zero, style: .grouped)
         table.register(
@@ -33,9 +34,9 @@ class HomeViewController: UIViewController {
         homeFeedTable.dataSource = self
         homeFeedTable.delegate = self
         configureNavbar()
-        let headerView = HeroHeaderView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450))
+        headerView = HeroHeaderView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450))
         homeFeedTable.tableHeaderView = headerView
-    
+        configureHeroHeaderView()
     }
 
     private func configureNavbar() {
@@ -54,7 +55,20 @@ class HomeViewController: UIViewController {
         homeFeedTable.frame = view.bounds
     }
 
-    
+    private func configureHeroHeaderView() {
+        APICaller.shared.getTrendingMovies { [weak self] result in
+            switch result {
+            case .success(let titles):
+                self?.randomTrendingMovie = titles.randomElement()
+                self?.headerView?.configure(with: TitleViewModel(
+                    titleName: self?.randomTrendingMovie?.title ?? "",
+                    posterURL: self?.randomTrendingMovie?.poster_path ?? ""
+                ))
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
 
 
 }
@@ -163,7 +177,7 @@ extension HomeViewController: CollectionViewTableViewCellDelegate {
         DispatchQueue.main.async {[weak self] in
             let vc = TitlePreviewViewController() 
             vc.configure(with: viewModel)
-            self? .navigationController?.pushViewController(vc, animated: true)
+            self?.navigationController?.pushViewController(vc, animated: true)
         }
     }
 }  
