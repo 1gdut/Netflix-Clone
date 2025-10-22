@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 struct Constants {
     static let API_KEY = "40e22a49e3d91d6db28d30ae4089ab8a"
@@ -16,6 +17,7 @@ struct Constants {
 
 enum APIError: Error {
     case failedToGetData
+    case invalidURL
 }
 
 class APICaller {
@@ -40,22 +42,17 @@ class APICaller {
     }
 
 
-    func getTrendingTvs(completion: @escaping (Result<[Title], Error>) -> Void) {
+    func getTrendingTvs() -> AnyPublisher<[Title], Error> {
         guard let url = URL(string: "\(Constants.baseURL)/3/trending/tv/day?api_key=\(Constants.API_KEY)&language=zh-CN") else {
-            return
+            return Fail(error: APIError.invalidURL).eraseToAnyPublisher()
         }
-        let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, _, error in
-            guard let data = data, error == nil else {
-                return
-            }
-            do {
-                let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
-                completion(.success(results.results))
-            } catch {
-                completion(.failure(APIError.failedToGetData))
-            }
-        }
-        task.resume()
+        
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map(\.data)
+            .decode(type: TrendingTitleResponse.self, decoder: JSONDecoder())
+            .map(\.results)
+            .mapError { _ in APIError.failedToGetData }
+            .eraseToAnyPublisher()
     }
 
     func getUpcomingMovies(completion: @escaping (Result<[Title], Error>) -> Void) {

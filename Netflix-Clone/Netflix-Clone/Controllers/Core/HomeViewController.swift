@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 enum SectionType: Int {
     case TrendingMovies = 0
@@ -19,6 +20,7 @@ class HomeViewController: UIViewController {
     let selectionTitles = ["热门电影", "热门电视剧", "流行", "即将上映的电影", "高评分"]
     private var randomTrendingMovie: Title?
     private var headerView: HeroHeaderView?
+    private var cancellables = Set<AnyCancellable>()
     private let homeFeedTable: UITableView = {
         let table = UITableView(frame: .zero, style: .grouped)
         table.register(
@@ -98,14 +100,19 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
                 }
             }
         case SectionType.TrendingTv.rawValue:
-            APICaller.shared.getTrendingTvs { result in
-                switch result {
-                case .success(let titles):
-                    cell.configure(with: titles)
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
+            APICaller.shared.getTrendingTvs()
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { completion in
+                    switch completion {
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    case .finished:
+                        break
+                    }
+                }, receiveValue: { [weak cell] titles in
+                    cell?.configure(with: titles)
+                })
+                .store(in: &cancellables)
         case SectionType.Popular.rawValue:
             APICaller.shared.getPopular { result in
                 switch result {
